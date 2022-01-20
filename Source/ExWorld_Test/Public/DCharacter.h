@@ -35,6 +35,15 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Attack")
     UAnimMontage* AttackAnim;
 
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float AttackCooldown = 120;
+
+	UPROPERTY()
+	float CurrentCooldown;
+
+	UPROPERTY()
+	bool bCanAttack = false;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -46,6 +55,9 @@ protected:
 
 	//Initiates a primary attack timer and animation
 	void PrimaryAttack();
+
+	UFUNCTION(Server, Reliable)
+	void ServerPrimaryAttack();
 
 	//Executes after an elapsed time. Calls an RPC to the server to spawn a projectile
 	void PrimaryAttack_TimeElapsed();

@@ -54,11 +54,44 @@ void ADCharacter::MoveRight(float Value)
 
 void ADCharacter::PrimaryAttack()
 {
-	PlayAnimMontage(AttackAnim);
+	if (HasAuthority())
+	{
+		if (bCanAttack == true)
+		{
+			PlayAnimMontage(AttackAnim);
+
+			FVector HandLocation = GetMesh()->GetSocketLocation(PrimaryAttackSocket);
+
+			//Spawn Transform Matrix
+			FTransform SpawnTM = FTransform(GetControlRotation() ,HandLocation);
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			SpawnParams.Instigator = this;
+	
+			GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+
+			bCanAttack = false;
+			CurrentCooldown = 0;
+		}
+	}
+	else
+	{
+		ServerPrimaryAttack();
+	}
+}
+
+void ADCharacter::ServerPrimaryAttack_Implementation()
+{
+	//if (bCanAttack == true)
+	//{
+		PrimaryAttack();
+	//}
 }
 
 void ADCharacter::PrimaryAttack_TimeElapsed()
 {
+	
 }
 
 // Called every frame
@@ -66,6 +99,26 @@ void ADCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!bCanAttack)
+	{
+		if (HasAuthority())
+		{
+			CurrentCooldown++;
+			if (CurrentCooldown >= AttackCooldown)
+			{
+				bCanAttack = true;
+			}
+		}
+
+		if (!IsRunningDedicatedServer() && CurrentCooldown < AttackCooldown)
+		{
+			if (!HasAuthority())
+			{
+				CurrentCooldown++;
+			}
+		}
+		
+	}
 }
 
 // Called to bind functionality to input
