@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataTable.h"
+
 #include "DEffect.h"
+#include "Engine/DataTable.h"
 #include "Enums/DAreaTraceShape.h"
 #include "Enums/DEffectType.h"
 #include "DEffect.generated.h"
@@ -13,6 +14,7 @@ USTRUCT(BlueprintType)
 struct FDEffect : public FTableRowBase
 {
 	GENERATED_BODY()
+	
 	/*The name of the effect.*/
 	UPROPERTY(EditAnywhere)
 	FString EffectName;
@@ -33,6 +35,9 @@ struct FDEffect : public FTableRowBase
 	UPROPERTY(EditAnywhere, meta=(ClampMin="1"))
 	int NumberOfObjectsToEffect;
 
+	UPROPERTY(EditAnywhere, meta=(EditCondition="NumberOfObjectsToEffect > 1", EditConditionHides, DisplayName="AOE Target Caps"))
+	TMap<TEnumAsByte<ECollisionChannel>, int> AoETargetCaps;
+
 	/*The shape in which an area will be sweeped.*/
 	UPROPERTY(EditAnywhere, meta=(EditCondition="NumberOfObjectsToEffect > 1", EditConditionHides))
 	TEnumAsByte<EDAreaTraceShape> AreaTraceShape;
@@ -52,4 +57,7 @@ struct FDEffect : public FTableRowBase
 	/*Determines whether or not the collision shape should be drawn as a debug shape*/
 	UPROPERTY(EditAnywhere, meta=(EditCondition="NumberOfObjectsToEffect > 1 && NumberOfObjectsToEffect > 1", EditConditionHides))
 	bool bDebugAreaCollision;
+
+	UPROPERTY(EditAnywhere)
+	bool bApplyEffectToInstigator;
 };

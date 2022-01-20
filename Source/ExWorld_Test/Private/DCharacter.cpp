@@ -28,7 +28,6 @@ ADCharacter::ADCharacter()
 void ADCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void ADCharacter::MoveForward(float Value)
@@ -83,10 +82,7 @@ void ADCharacter::PrimaryAttack()
 
 void ADCharacter::ServerPrimaryAttack_Implementation()
 {
-	//if (bCanAttack == true)
-	//{
-		PrimaryAttack();
-	//}
+	PrimaryAttack();
 }
 
 void ADCharacter::PrimaryAttack_TimeElapsed()
@@ -112,6 +108,7 @@ void ADCharacter::Tick(float DeltaTime)
 
 		if (!IsRunningDedicatedServer() && CurrentCooldown < AttackCooldown)
 		{
+			//The cooldown is predicted on the client
 			if (!HasAuthority())
 			{
 				CurrentCooldown++;

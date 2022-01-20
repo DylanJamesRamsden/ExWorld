@@ -11,7 +11,7 @@
 
 #include "DProjectile.generated.h"
 
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FProjectileSpawned, class ADProjectile*, ProjectileSpawned);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FApplyEffect, AActor*, AffectedActor, FDEffect, EffectApplied);
 
 UCLASS()
 class EXWORLD_TEST_API ADProjectile : public AActor
@@ -33,16 +33,37 @@ protected:
 	UProjectileMovementComponent* MovementComp;
 
 	UPROPERTY(EditAnywhere, Category = "Projectile traits:")
-	FDataTableRowHandle Effect;
+	FDataTableRowHandle EffectHandle;
+
+	FDEffect* Effect;
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	void OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+	void OnProjectileBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-public:	
+	bool IsEffectableActor(UPrimitiveComponent* OverlappedComp);
+
+public:
+	UPROPERTY(BlueprintAssignable)
+	FApplyEffect OnApplyEffect;
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(Server, Reliable)
+	void ServerDestroyHitActor(AActor* Actor);
+
+	UFUNCTION(Client, Reliable)
+	void ClientDestroyHitActor(AActor* Actor);
+
+	UFUNCTION(Server, Reliable)
+	void ServerApplyEffect(FHitResult HitResult);
+
+	UFUNCTION()
+	void ApplyEffect(FHitResult HitResult);
+
+	UFUNCTION()
+	void AOEOverlap(FVector OverlapOrigin, EDAreaTraceShape OverlapShape, EDEffectType EffectType);
 };
