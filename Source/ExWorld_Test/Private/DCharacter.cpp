@@ -18,6 +18,8 @@ ADCharacter::ADCharacter()
 	
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	SpellComponent = CreateDefaultSubobject<UDSpellComponent>("SpellComp");
 	
 	//Rotates the character to face the direction in which they are moving
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -59,31 +61,9 @@ void ADCharacter::PrimaryAttack()
 {
 	if (HasAuthority())
 	{
-		if (bCanAttack == true)
+		if (SpellComponent->IsSpellAvailable())
 		{
-			if (!GetWorldTimerManager().IsTimerActive(FireTimerHandle))
-			{
-				ADPlayerState* OwningPlayerState = Cast<ADPlayerState>(GetPlayerState());
-
-				if (OwningPlayerState)
-				{
-					if (OwningPlayerState->GetMana() - ProjectileManaCost > 0)
-					{
-						if (AttackAnim)
-						{
-							GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ADCharacter::SpawnProjectile, AttackAnim->CalculateSequenceLength()/2);
-							ClientPlayAttackAnimation();
-						}
-						else
-						{
-							SpawnProjectile();
-						}
-						bCanAttack = false;
-						CurrentCooldown = 0;
-						OwningPlayerState->RemoveMana(ProjectileManaCost);
-					}
-				}
-			}
+			SpellComponent->CastSpell();
 		}
 	}
 	else
@@ -97,12 +77,7 @@ void ADCharacter::ServerPrimaryAttack_Implementation()
 	PrimaryAttack();
 }
 
-void ADCharacter::PrimaryAttack_TimeElapsed()
-{
-	
-}
-
-void ADCharacter::SpawnProjectile()
+/*void ADCharacter::SpawnProjectile()
 {	
 	FVector HandLocation = GetMesh()->GetSocketLocation(PrimaryAttackSocket);
 
@@ -114,19 +89,19 @@ void ADCharacter::SpawnProjectile()
 	SpawnParams.Instigator = this;
 	
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
-}
+}*/
 
-void ADCharacter::ClientPlayAttackAnimation_Implementation()
+/*void ADCharacter::ClientPlayAttackAnimation_Implementation()
 {
 	PlayAnimMontage(AttackAnim);
-}
+}*/
 
 // Called every frame
 void ADCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!bCanAttack)
+	/*if (!bCanAttack)
 	{
 		if (HasAuthority())
 		{
@@ -146,7 +121,7 @@ void ADCharacter::Tick(float DeltaTime)
 			}
 		}
 		
-	}
+	}*/
 }
 
 // Called to bind functionality to input
@@ -173,5 +148,10 @@ void ADCharacter::TakeDamage(AActor* DamagedActor, float Damage, const class UDa
 	{
 		OwningPlayerState->RemoveHealth(Damage);
 	}
+}
+
+UDSpellComponent* ADCharacter::GetSpellComponent() const
+{
+	return SpellComponent;
 }
 
