@@ -14,6 +14,7 @@ UDSpellComponent::UDSpellComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	/*Component set to tick once per a second.*/
 	SetComponentTickInterval(1.0f);
 }
 
@@ -25,14 +26,24 @@ void UDSpellComponent::BeginPlay()
 
 	OwningCharacter = Cast<ADCharacter>(GetOwner());
 
+	/*The spell starts on cooldown*/
 	CurrentSpellCooldownTime = SpellCooldownTime;
 }
 
 void UDSpellComponent::SpawnProjectile() const
 {
-	FVector HandLocation = OwningCharacter->GetMesh()->GetSocketLocation(PrimaryAttackSocket);
+	/*If a socket name is not provided, the projectile will be spawned at the location of the owning character*/
+	FVector HandLocation;
+	if (PrimaryAttackSocket != "")
+	{
+		HandLocation = OwningCharacter->GetMesh()->GetSocketLocation(PrimaryAttackSocket);
+	}
+	else
+	{
+		HandLocation = OwningCharacter->GetActorLocation();
+	}
 
-	//Spawn Transform Matrix
+	/*Spawn Transform Matrix*/
 	FTransform SpawnTM = FTransform(OwningCharacter->GetControlRotation() ,HandLocation);
 
 	FActorSpawnParameters SpawnParams;
@@ -58,28 +69,27 @@ void UDSpellComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (!bIsAvailable)
+	if (!bCanCast)
 	{
 		if (OwningCharacter->HasAuthority())
 		{
 			CurrentSpellCooldownTime--;
 			if (CurrentSpellCooldownTime <= 0)
 			{
-				bIsAvailable = true;
+				bCanCast = true;
 			}
 		}
 
+		/*Client cooldown is predicted for UI purposes. The server's cooldown determines whether or not the spell can be cast.*/
 		if (!IsRunningDedicatedServer() && CurrentSpellCooldownTime > 0)
 		{
-			//The cooldown is predicted on the client
+			/*The cooldown is predicted on the client*/
 			if (!OwningCharacter->HasAuthority())
 			{
 				CurrentSpellCooldownTime--;
 			}
 		}
-		
 	}
-	// ...
 }
 
 bool UDSpellComponent::IsSpellAffordable(float CurrentMana) const
@@ -98,7 +108,7 @@ void UDSpellComponent::CastSpell()
 {
 	if (OwningCharacter)
 	{
-		if (bIsAvailable == true)
+		if (bCanCast == true)
 		{
 			ADPlayerState* OwningPlayerState = Cast<ADPlayerState>(OwningCharacter->GetPlayerState());
 
@@ -119,7 +129,7 @@ void UDSpellComponent::CastSpell()
 					CurrentSpellCooldownTime = SpellCooldownTime;
 					ClientResetCooldownTimer();
 					
-					bIsAvailable = false;
+					bCanCast = false;
 					OwningPlayerState->RemoveMana(ManaCost);
 				}
 			}
@@ -127,9 +137,9 @@ void UDSpellComponent::CastSpell()
 	}
 }
 
-bool UDSpellComponent::IsSpellAvailable()
+bool UDSpellComponent::CanCastSpell()
 {
-	return bIsAvailable;
+	return bCanCast;
 }
 
 int UDSpellComponent::GetCurrentSpellCooldownTime()

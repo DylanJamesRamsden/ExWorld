@@ -68,7 +68,7 @@ void ADCharacter::PrimaryAttack()
 	{
 		if (SpellComponent)
 		{
-			if (SpellComponent->IsSpellAvailable())
+			if (SpellComponent->CanCastSpell())
 			{
 				SpellComponent->CastSpell();
 			}	
