@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 
-#include "DEffect.h"
 #include "Engine/DataTable.h"
 #include "Enums/DAreaTraceShape.h"
 #include "Enums/DEffectType.h"
