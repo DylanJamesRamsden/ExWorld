@@ -37,34 +37,6 @@ void ADProjectile::BeginPlay()
 	Effect = EffectHandle.GetRow<FDEffect>("");
 	
 	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ADProjectile::OnProjectileBeginOverlap);
-
-	//UGameplayStatics::A
-}
-
-
-void ADProjectile::OnProjectileBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	ApplyEffect(SweepResult);
-}
-
-bool ADProjectile::IsEffectableActor(UPrimitiveComponent* OverlappedComp)
-{
-	bool bIsEffectable = false;
-	
-	if(OverlappedComp)
-	{
-		for (auto ObjectType : Effect->ObjectTypesToEffect)
-		{
-			if (OverlappedComp->GetCollisionObjectType() == ObjectType)
-			{
-				bIsEffectable = true;
-				break;
-			}
-		}	
-	}
-
-	return bIsEffectable;
 }
 
 // Called every frame
@@ -73,9 +45,10 @@ void ADProjectile::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADProjectile::ClientDestroyHitActor_Implementation(AActor* Actor)
+void ADProjectile::OnProjectileBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Actor->Destroy();
+	ApplyEffect(SweepResult);
 }
 
 void ADProjectile::ApplyEffect(FHitResult HitResult)
@@ -86,55 +59,47 @@ void ADProjectile::ApplyEffect(FHitResult HitResult)
 		{
 			if (Effect)
 			{
-				switch (Effect->EffectType)
+				if (Effect->NumberOfObjectsToEffect <= 1)
 				{
-				case EDEffectType::Destroy:
-					if (Effect->NumberOfObjectsToEffect <= 1)
+					if (IsAffectableActor(HitResult.GetComponent()))
 					{
-						//Add check
-						if (IsEffectableActor(HitResult.GetComponent()))
-						{
-							ClientDestroyHitActor(HitResult.GetActor());
-						}
-
-						if (Effect->bDestroyOnCollision)
-						{
-							ClientDestroyHitActor(this);	
-						}
+						ApplyEffectToSingleHitActor(HitResult.GetActor(), Effect->EffectType);
 					}
-					else
+						
+					if (Effect->bDestroyOnCollision)
 					{
-						AOEOverlap(HitResult.ImpactPoint, Effect->AreaTraceShape, Effect->EffectType);
+						ClientDestroyHitActor(this);	
 					}
-					break;
-				case EDEffectType::ApplyDamage:
-					if (Effect->NumberOfObjectsToEffect <= 1)
-					{
-						//Add check
-						if (IsEffectableActor(HitResult.GetComponent()))
-						{
-							UGameplayStatics::ApplyDamage(HitResult.GetActor(), Effect->DamageToApply, GetInstigator()->GetController(), this, UDamageType::StaticClass());
-						}
-
-						if (Effect->bDestroyOnCollision)
-						{
-							ClientDestroyHitActor(this);	
-						}
-					}
-					else
-					{
-						AOEOverlap(HitResult.ImpactPoint, Effect->AreaTraceShape, Effect->EffectType);
-					}
-					break;
-					break;
-					
-					}
+				}
+				else
+				{
+					//An an AOE check is done on the server to verify the collision
+					AOEOverlap(HitResult.ImpactPoint, Effect->AreaTraceShape, Effect->EffectType);
+				}
 			}
 		}	
 	}
 	else
 	{
 		ServerApplyEffect(HitResult);
+	}
+}
+
+void ADProjectile::ServerApplyEffect_Implementation(FHitResult HitResult)
+{
+	ApplyEffect(HitResult);
+}
+
+void ADProjectile::ApplyEffectToSingleHitActor(AActor* HitActor, EDEffectType EffectType)
+{
+	switch (EffectType)
+	{
+		case EDEffectType::Destroy:
+			ClientDestroyHitActor(HitActor);
+			break;
+		case EDEffectType::ApplyDamage:
+			UGameplayStatics::ApplyDamage(HitActor, Effect->DamageToApply, GetInstigator()->GetController(), this, UDamageType::StaticClass());
+			break;
 	}
 }
 
@@ -159,7 +124,7 @@ void ADProjectile::AOEOverlap(FVector OverlapOrigin, EDAreaTraceShape OverlapSha
 
 	for (auto SweepResult : SweepResults)
 	{
-		if (SweepResult.GetActor() != this && IsEffectableActor(SweepResult.GetComponent()))
+		if (SweepResult.GetActor() != this && IsAffectableActor(SweepResult.GetComponent()))
 		{
 			if (CurrentAoETargetCaps.Contains(SweepResult.GetComponent()->GetCollisionObjectType()))
 			{
@@ -199,13 +164,32 @@ void ADProjectile::AOEOverlap(FVector OverlapOrigin, EDAreaTraceShape OverlapSha
 	}
 }
 
-void ADProjectile::ServerApplyEffect_Implementation(FHitResult HitResult)
-{
-	ApplyEffect(HitResult);
-}
-
 void ADProjectile::ServerDestroyHitActor_Implementation(AActor* Actor)
 {
 	ClientDestroyHitActor(Actor);
+}
+
+void ADProjectile::ClientDestroyHitActor_Implementation(AActor* Actor)
+{
+	Actor->Destroy();
+}
+
+bool ADProjectile::IsAffectableActor(UPrimitiveComponent* OverlappedComp) const
+{
+	bool bIsEffectable = false;
+	
+	if(OverlappedComp)
+	{
+		for (auto ObjectType : Effect->ObjectTypesToEffect)
+		{
+			if (OverlappedComp->GetCollisionObjectType() == ObjectType)
+			{
+				bIsEffectable = true;
+				break;
+			}
+		}	
+	}
+
+	return bIsEffectable;
 }
 

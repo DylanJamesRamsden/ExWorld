@@ -38,11 +38,17 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	float AttackCooldown = 120;
 
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	float ProjectileManaCost = 20;
+
 	UPROPERTY()
 	float CurrentCooldown;
 
 	UPROPERTY()
 	bool bCanAttack = false;
+
+	UPROPERTY()
+	FTimerHandle FireTimerHandle;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -62,11 +68,19 @@ protected:
 	//Executes after an elapsed time. Calls an RPC to the server to spawn a projectile
 	void PrimaryAttack_TimeElapsed();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void ClientPlayAttackAnimation();
+
+	UFUNCTION()
+	void SpawnProjectile();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
+	UFUNCTION(BlueprintCallable)
+	void TakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 };

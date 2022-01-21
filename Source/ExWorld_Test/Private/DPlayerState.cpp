@@ -5,9 +5,9 @@
 
 #include "Net/UnrealNetwork.h"
 
-void ADPlayerState::SetHealth(float NewHealth)
+void ADPlayerState::SetHealth(float NewAmount)
 {
-	Health = NewHealth;
+	Health = NewAmount;
 }
 
 float ADPlayerState::GetHealth() const
@@ -20,14 +20,19 @@ float ADPlayerState::GetHealthAsDecimal() const
 	return Health * 0.01f;
 }
 
-void ADPlayerState::AddHealth(float HealthToAdd)
+void ADPlayerState::AddHealth(float Amount)
 {
-	Health = FMath::Clamp(Health + HealthToAdd, 0.0f, 100.0f);
+	Health = FMath::Clamp(Health + Amount, 0.0f, 100.0f);
 }
 
-void ADPlayerState::SetMana(float NewMana)
+void ADPlayerState::RemoveHealth(float Amount)
 {
-	Mana = NewMana;
+	Health = FMath::Clamp(Health - Amount, 0.0f, 100.0f);
+}
+
+void ADPlayerState::SetMana(float NewAmount)
+{
+	Mana = NewAmount;
 }
 
 float ADPlayerState::GetMana() const
@@ -40,9 +45,14 @@ float ADPlayerState::GetManaAsDecimal() const
 	return Mana * 0.01f;
 }
 
-void ADPlayerState::AddMana(float ManaToAdd)
+void ADPlayerState::AddMana(float Amount)
 {
-	Mana = FMath::Clamp(Mana + ManaToAdd, 0.0f, 100.0f);
+	Mana = FMath::Clamp(Mana + Amount, 0.0f, 100.0f);
+}
+
+void ADPlayerState::RemoveMana(float Amount)
+{
+	Mana = FMath::Clamp(Mana - Amount, 0.0f, 100.0f);
 }
 
 void ADPlayerState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const

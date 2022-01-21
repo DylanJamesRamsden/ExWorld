@@ -25,7 +25,7 @@ class EXWORLD_TEST_API ADPlayerState : public APlayerState
 	public:
 
 	UFUNCTION(BlueprintCallable)
-	void SetHealth(float NewHealth);
+	void SetHealth(float NewAmount);
 
 	UFUNCTION(BlueprintPure)
 	float GetHealth() const;
@@ -34,10 +34,13 @@ class EXWORLD_TEST_API ADPlayerState : public APlayerState
 	float GetHealthAsDecimal() const;
 
 	UFUNCTION(BlueprintCallable)
-	void AddHealth(float HealthToAdd);
+	void AddHealth(float Amount);
 
 	UFUNCTION(BlueprintCallable)
-	void SetMana(float NewMana);
+	void RemoveHealth(float Amount);
+
+	UFUNCTION(BlueprintCallable)
+	void SetMana(float NewAmount);
 
 	UFUNCTION(BlueprintPure)
 	float GetMana() const;
@@ -46,5 +49,8 @@ class EXWORLD_TEST_API ADPlayerState : public APlayerState
 	float GetManaAsDecimal() const;
 
 	UFUNCTION(BlueprintCallable)
-	void AddMana(float ManaToAdd);
+	void AddMana(float Amount);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveMana(float Amount);
 };

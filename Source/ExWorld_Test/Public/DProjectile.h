@@ -43,7 +43,7 @@ protected:
 	UFUNCTION()
 	void OnProjectileBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	bool IsEffectableActor(UPrimitiveComponent* OverlappedComp);
+	bool IsAffectableActor(UPrimitiveComponent* OverlappedComp) const;
 
 public:
 	UPROPERTY(BlueprintAssignable)
@@ -52,18 +52,21 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+	void ApplyEffect(FHitResult HitResult);
+
+	UFUNCTION(Server, Reliable)
+	void ServerApplyEffect(FHitResult HitResult);
+	
+	UFUNCTION()
+	void ApplyEffectToSingleHitActor(AActor* HitActor, EDEffectType EffectType);
+
+	UFUNCTION()
+	void AOEOverlap(FVector OverlapOrigin, EDAreaTraceShape OverlapShape, EDEffectType EffectType);
+
 	UFUNCTION(Server, Reliable)
 	void ServerDestroyHitActor(AActor* Actor);
 
 	UFUNCTION(Client, Reliable)
 	void ClientDestroyHitActor(AActor* Actor);
-
-	UFUNCTION(Server, Reliable)
-	void ServerApplyEffect(FHitResult HitResult);
-
-	UFUNCTION()
-	void ApplyEffect(FHitResult HitResult);
-
-	UFUNCTION()
-	void AOEOverlap(FVector OverlapOrigin, EDAreaTraceShape OverlapShape, EDEffectType EffectType);
 };
