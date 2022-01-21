@@ -20,9 +20,9 @@ float ADPlayerState::GetHealthAsDecimal() const
 	return Health * 0.01f;
 }
 
-void ADPlayerState::AddHealth(float Amount)
+void ADPlayerState::AddHealth(float Value)
 {
-	Health = FMath::Clamp(Health + Amount, 0.0f, 100.0f);
+	Health = FMath::Clamp(Health + Value, 0.0f, 100.0f);
 }
 
 void ADPlayerState::RemoveHealth(float Amount)
@@ -30,9 +30,9 @@ void ADPlayerState::RemoveHealth(float Amount)
 	Health = FMath::Clamp(Health - Amount, 0.0f, 100.0f);
 }
 
-void ADPlayerState::SetMana(float NewAmount)
+void ADPlayerState::SetMana(float Value)
 {
-	Mana = NewAmount;
+	Mana = Value;
 }
 
 float ADPlayerState::GetMana() const
