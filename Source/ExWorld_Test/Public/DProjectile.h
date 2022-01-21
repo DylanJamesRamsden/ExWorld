@@ -23,13 +23,13 @@ public:
 	ADProjectile();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere)
 	USphereComponent* SphereComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* StaticMeshComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* MovementComp;
 	
 	/*The data table row of the effect you want to apply with this projectile.*/
@@ -49,13 +49,11 @@ protected:
 	/*Runs ApplyEffect() on the server. Ensures that the server verifies that the effect can and is applied.*/
 	UFUNCTION(Server, Reliable)
 	void ServerApplyEffect(FHitResult HitResult);
-
+	
 	/*Applies the selected effect to a single given actor*/
-	UFUNCTION()
 	void ApplyEffectToSingleActor(AActor* HitActor);
 
 	/*Preform a overlap check for multiple objects based on a channel. All overlapped actors have the selected effect applied to them if they satisfy the effect's conditions.*/
-	UFUNCTION()
 	void ApplyEffectAsAOE(FVector OverlapOrigin);
 
 	/*Calls for the destruction of an actor over the server, resulting in a client RPC destroying the actor locally.*/
@@ -81,6 +79,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	/*Applies the selected effect to a given object.*/
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void ApplyEffect(FHitResult HitResult);
+
+	UFUNCTION(BlueprintCallable)
+	void SetProjectileEffect(FDEffect NewEffect);
 };

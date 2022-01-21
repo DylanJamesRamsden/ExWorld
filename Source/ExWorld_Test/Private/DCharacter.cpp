@@ -22,7 +22,7 @@ ADCharacter::ADCharacter()
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	//A spell component is created. This component will handle the spawning of a projectile and it's cooldown.
-	SpellComponent = CreateDefaultSubobject<UDSpellComponent>("SpellComp");
+	SpellComp = CreateDefaultSubobject<UDSpellComponent>("SpellComponent");
 	
 	//Rotates the character to face the direction in which they are moving.
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -66,11 +66,11 @@ void ADCharacter::PrimaryAttack()
 	//A primary attack must be called on the server, so if the server has not called it then a server RPC of the primary attack is forced.
 	if (HasAuthority())
 	{
-		if (SpellComponent)
+		if (SpellComp)
 		{
-			if (SpellComponent->CanCastSpell())
+			if (SpellComp->CanCastSpell())
 			{
-				SpellComponent->CastSpell();
+				SpellComp->CastSpell();
 			}	
 		}
 	}
@@ -91,7 +91,7 @@ void ADCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADCharacter::TakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
+void ADCharacter::TakeDamage_Implementation(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
 	ADPlayerState* OwningPlayerState = Cast<ADPlayerState>(GetPlayerState());
 
@@ -103,7 +103,7 @@ void ADCharacter::TakeDamage(AActor* DamagedActor, float Damage, const class UDa
 
 UDSpellComponent* ADCharacter::GetSpellComponent() const
 {
-	return SpellComponent;
+	return SpellComp;
 }
 
 // Called to bind functionality to input

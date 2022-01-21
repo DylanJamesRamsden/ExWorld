@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+#include "DProjectile.h"
 #include "DSpellComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/Character.h"
@@ -28,8 +29,8 @@ protected:
     USpringArmComponent* SpringArmComp;
 
 	/*The spell component is responsible for spawning a projectile when the character attacks as well as handling the cooldown timer.*/
-    UPROPERTY(VisibleAnywhere)
-	UDSpellComponent* SpellComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UDSpellComponent* SpellComp;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -55,7 +56,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	/*Apply damage to the character. This function is bound to OnTakeAnyDamage.*/
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintNativeEvent)
 	void TakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	
 	/*Get the spell component of the character.*/

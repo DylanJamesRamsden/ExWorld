@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "DProjectile.h"
 #include "Components/ActorComponent.h"
 #include "DSpellComponent.generated.h"
 
@@ -58,7 +60,6 @@ protected:
 	virtual void BeginPlay() override;
 
 	/*Spawns a projectile into the world.*/
-	UFUNCTION()
 	void SpawnProjectile() const;
 
 	/*Plays the cast animation on all of the clients.*/
@@ -74,16 +75,19 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	/*Whether or not the spell can be casted based on the given mana and the mana cost of the spell.*/
-	UFUNCTION()
+	UFUNCTION(BlueprintPure)
 	bool IsSpellAffordable(float CurrentMana) const;
 
 	/*Initiates the casting of a spell.*/
-	UFUNCTION()
+	UFUNCTION(BlueprintNativeEvent)
 	void CastSpell();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintPure)
 	bool CanCastSpell();
 
 	UFUNCTION(BlueprintPure)
 	int GetCurrentSpellCooldownTime();
+
+	UFUNCTION(BlueprintCallable)
+	void SetProjectile(TSubclassOf<AActor> NewProjectile);
 };

@@ -104,7 +104,7 @@ bool UDSpellComponent::IsSpellAffordable(float CurrentMana) const
 	}
 }
 
-void UDSpellComponent::CastSpell()
+void UDSpellComponent::CastSpell_Implementation()
 {
 	if (OwningCharacter)
 	{
@@ -145,5 +145,10 @@ bool UDSpellComponent::CanCastSpell()
 int UDSpellComponent::GetCurrentSpellCooldownTime()
 {
 	return CurrentSpellCooldownTime;
+}
+
+void UDSpellComponent::SetProjectile(TSubclassOf<AActor> NewProjectile)
+{
+	ProjectileClass = NewProjectile;
 }
 

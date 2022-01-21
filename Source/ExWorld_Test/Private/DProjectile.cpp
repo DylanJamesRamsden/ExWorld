@@ -54,7 +54,7 @@ void ADProjectile::OnProjectileBeginOverlap(UPrimitiveComponent* OverlappedComp,
 	ApplyEffect(SweepResult);
 }
 
-void ADProjectile::ApplyEffect(FHitResult HitResult)
+void ADProjectile::ApplyEffect_Implementation(FHitResult HitResult)
 {
 	/*If an effect is being applied to another actor, it must always be verified and executed by the server to ensure there is no client-side exploiting or cheating.*/
 	/*If the client calls for an effect to be applied, it is forced to run on the server.*/
@@ -93,6 +93,11 @@ void ADProjectile::ApplyEffect(FHitResult HitResult)
 	{
 		ServerApplyEffect(HitResult);
 	}
+}
+
+void ADProjectile::SetProjectileEffect(FDEffect NewEffect)
+{
+	Effect = &NewEffect;
 }
 
 void ADProjectile::ServerApplyEffect_Implementation(FHitResult HitResult)

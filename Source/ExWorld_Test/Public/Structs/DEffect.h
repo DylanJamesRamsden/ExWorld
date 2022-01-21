@@ -56,7 +56,4 @@ struct FDEffect : public FTableRowBase
 	/*Determines whether or not the collision shape should be drawn as a debug shape*/
 	UPROPERTY(EditAnywhere, meta=(EditCondition="NumberOfObjectsToEffect > 1 && NumberOfObjectsToEffect > 1", EditConditionHides))
 	bool bDebugAreaCollision;
-
-	UPROPERTY(EditAnywhere)
-	bool bApplyEffectToInstigator;
 };
